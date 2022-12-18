@@ -20,6 +20,10 @@ const listSchema = new Schema({
 })
 const List = mongoose.model("List", listSchema);
 
+app.get("/",(req,res)=>{
+    res.send({msg:"welcome to words API"})
+})
+
 app.get("/alphabet/:data",(req,res)=>{
     const inputWord = req.params.data.slice(0,1);
     List.find({ main: inputWord }, (err, result) => {
@@ -49,7 +53,7 @@ app.get("/words/:data", (req, res) => {
     }
 });
 
-app.get("/matchs/:word", (req, res) => {
+app.get("/matches/:word", (req, res) => {
     const inputWord = req.params.word;
     if (inputWord.length >= 2) {
         List.find({ word: inputWord.slice(0, 2) }, (err, result) => {
