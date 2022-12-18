@@ -116,6 +116,7 @@ async function detailsList(arrlist,maxLength){
     return(vals);
 }
 
-app.listen("3000", () => {
-    console.log("server is running on port 3000");
+app.listen(process.env.PORT || 3000, function () {
+    console.log("server in running on 3000");
 });
+  
