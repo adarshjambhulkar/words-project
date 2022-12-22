@@ -7,6 +7,7 @@ const app = express();
 const { Schema } = mongoose;
 
 
+
 mongoose.set('strictQuery', false);
 
 mongoose.connect(`mongodb+srv://${process.env.USER}:${process.env.USER_KEY}@wordsapi.olarckx.mongodb.net/wordsDB`)
@@ -22,7 +23,7 @@ const List = mongoose.model("List", listSchema);
 
 app.get("/",(req,res)=>{
     res.send({msg:"welcome to words API"})
-})
+});
 
 app.get("/alphabet/:data",(req,res)=>{
     const inputWord = req.params.data.slice(0,1);
@@ -34,7 +35,7 @@ app.get("/alphabet/:data",(req,res)=>{
                 let {main,word,data} = element;
                 ans.push({latter:main,sublatter:word,list:data});
             });
-            res.send(result.length === 0 ? [] : ans)
+            res.status(200).json(result.length === 0 ? [] : ans)
         }
     });
 });
@@ -45,11 +46,11 @@ app.get("/words/:data", (req, res) => {
         List.find({ word: inputWord }, (err, result) => {
             if (err) { console.log(err); }
             else {
-                res.send(result.length === 0 ? [] : result[0].data)
+                res.status(200).json(result.length === 0 ? [] : result[0].data)
             }
         });
     } else {
-        res.send("only two words required")
+        res.status(404).json(["only two alphabates requred"])
     }
 });
 
@@ -61,15 +62,15 @@ app.get("/matches/:word", (req, res) => {
             else {
                 let data = result.length === 0 ? [] : result[0].data
                 let ans = data.filter((item) => item.slice(0, inputWord.length) === inputWord);
-                res.send(ans)
+                res.status(200).json(ans)
             }
         });
     } else {
-        res.send("minimum two alphabates requred")
+        res.status(404).json(["minimum two alphabates requred"])
     }
 })
 
-app.get("/details/matchs/:word-:calls", (req, res) => {
+app.get("/details/matches/:word-:calls", (req, res) => {
     const inputWord = req.params.word;
     const maxLength = Number(req.params.calls)
     
@@ -79,11 +80,11 @@ app.get("/details/matchs/:word-:calls", (req, res) => {
             else {
                 let data = result.length === 0 ? [] : result[0].data
                 let arrlist = data.filter((item) => item.slice(0, inputWord.length) === inputWord);
-                res.send(await detailsList(arrlist,maxLength))
+                res.status(200).json(await detailsList(arrlist,maxLength))
             }
         });
     } else {
-        res.send("minimum two alphabates requred")
+        res.status(404).json(["minimum two alphabates requred"])
     }
 })
 
