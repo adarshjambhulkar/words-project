@@ -37,7 +37,7 @@ app.get("/alphabet/:data",(req,res)=>{
                 let {main,word,data} = element;
                 ans.push({latter:main,sublatter:word,list:data});
             });
-            res.status(200).json(result.length === 0 ? [] : ans)
+            res.send(result.length === 0 ? [] : ans)
         }
     });
 });
@@ -48,11 +48,11 @@ app.get("/words/:data", (req, res) => {
         List.find({ word: inputWord }, (err, result) => {
             if (err) { console.log(err); }
             else {
-                res.status(200).json(result.length === 0 ? [] : result[0].data)
+                res.send(result.length === 0 ? [] : result[0].data)
             }
         });
     } else {
-        res.status(404).json(["only two alphabates requred"])
+        res.send(["only two alphabates requred"])
     }
 });
 
@@ -64,11 +64,11 @@ app.get("/matches/:word", (req, res) => {
             else {
                 let data = result.length === 0 ? [] : result[0].data
                 let ans = data.filter((item) => item.slice(0, inputWord.length) === inputWord);
-                res.status(200).json(ans)
+                res.send(ans)
             }
         });
     } else {
-        res.status(404).json(["minimum two alphabates requred"])
+        res.send(["minimum two alphabates requred"])
     }
 })
 
@@ -82,11 +82,11 @@ app.get("/details/matches/:word-:calls", (req, res) => {
             else {
                 let data = result.length === 0 ? [] : result[0].data
                 let arrlist = data.filter((item) => item.slice(0, inputWord.length) === inputWord);
-                res.status(200).json(await detailsList(arrlist,maxLength))
+                res.send(await detailsList(arrlist,maxLength))
             }
         });
     } else {
-        res.status(404).json(["minimum two alphabates requred"])
+        res.send(["minimum two alphabates requred"])
     }
 })
 
