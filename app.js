@@ -99,7 +99,7 @@ async function detailsList(arrlist,maxLength){
     let vals  = [];
     let length = arr.length>=finalLength?finalLength:arr.length;
     for (let i = 0;i < length; i++) {
-      
+        const item = arr[i];
         await new Promise(resolve => {
             
             let url = "https://api.dictionaryapi.dev/api/v2/entries/en/"+item;    
