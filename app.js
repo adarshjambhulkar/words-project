@@ -89,6 +89,27 @@ app.get("/details/matches/:word-:calls", (req, res) => {
         res.send(["minimum two alphabates requred"])
     }
 })
+app.get("/details/:word", (req, res) => {
+    const inputWord = req.params.word;
+    if (inputWord.length >= 2) {
+        List.find({ word: inputWord.slice(0, 2) }, async (err, result) => {
+            if (err) { console.log(err); }
+            else {
+                let data = result.length === 0 ? [] : result[0].data
+                let arrlist = data.filter((item) => item === inputWord);
+
+                let mydata = await detailsList(arrlist,1)
+                
+                res.send(mydata[inputWord]?mydata[inputWord]:["No word found"]);
+            }
+        });
+    } else {
+        res.send(["minimum two alphabates requred"])
+    }
+
+});
+
+
 
 async function detailsList(arrlist,maxLength){
     let arr = arrlist;
@@ -96,7 +117,7 @@ async function detailsList(arrlist,maxLength){
         return { "ErrorMsg":"invalid input, use <word>-<Number>"}
     }
     let finalLength = maxLength>=10?10:maxLength; //max length of responce
-    let vals  = [];
+    let vals  = {};
     let length = arr.length>=finalLength?finalLength:arr.length;
     for (let i = 0;i < length; i++) {
         const item = arr[i];
@@ -104,13 +125,11 @@ async function detailsList(arrlist,maxLength){
             
             let url = "https://api.dictionaryapi.dev/api/v2/entries/en/"+item;    
             axios.get(url)
-            .then(function (result) {
-          
-                vals.push(result.data)
+            .then(function (result) {        
+            vals[item]=result.data;
             })
             .catch(function (error) {
-          
-                vals.push([]);
+            vals[item]=[];
             })
             .finally(function(){
                 resolve();
