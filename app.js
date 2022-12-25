@@ -96,23 +96,21 @@ async function detailsList(arrlist,maxLength){
         return { "ErrorMsg":"invalid input, use <word>-<Number>"}
     }
     let finalLength = maxLength>=10?10:maxLength; //max length of responce
-    let vals  = {};
+    let vals  = [];
     let length = arr.length>=finalLength?finalLength:arr.length;
     for (let i = 0;i < length; i++) {
-        const item = arr[i];
+      
         await new Promise(resolve => {
             
             let url = "https://api.dictionaryapi.dev/api/v2/entries/en/"+item;    
             axios.get(url)
             .then(function (result) {
-
-                let temp= item;
-                vals[temp]= result.data;
+          
+                vals.push(result.data)
             })
             .catch(function (error) {
-
-                let temp= item;
-                vals[temp]=[];
+          
+                vals.push([]);
             })
             .finally(function(){
                 resolve();
