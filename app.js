@@ -139,7 +139,20 @@ function manageData(arr){
             meaningData.examples = exampleData.map(item=>item.example);
             meaningData.synonyms=item.synonyms;
             meaningData.antonyms=item.antonyms;
-            result.meanings = [...result.meanings, meaningData];
+            if(result.meanings.length===0){
+                result.meanings = [...result.meanings, meaningData];
+            }else{
+                let temp = result.meanings.findIndex(ele=>ele.partOfSpeech===meaningData.partOfSpeech)
+                if(temp === -1){
+                    result.meanings = [...result.meanings, meaningData];
+                }else{
+                    result.meanings[temp].definations=[...result.meanings[temp].definations,...meaningData.definations];
+                    result.meanings[temp].examples=[...result.meanings[temp].examples,...meaningData.examples];
+                    result.meanings[temp].synonyms=[...result.meanings[temp].synonyms,...meaningData.synonyms];
+                    result.meanings[temp].antonyms=[...result.meanings[temp].antonyms,...meaningData.antonyms];
+                }
+            }
+            
         })
         result.sourceUrls=[...element.sourceUrls,"https://dictionaryapi.dev/"];
     });
