@@ -12,7 +12,7 @@ const { Schema } = mongoose;
 
 mongoose.set('strictQuery', false);
 
-mongoose.connect(`mongodb+srv://${process.env.USER}:${process.env.USER_KEY}@wordsapi.olarckx.mongodb.net/wordsDB`)
+mongoose.connect(`mongodb+srv://${process.env.USER_NAME}:${process.env.USER_KEY}@wordsapi.olarckx.mongodb.net/wordsDB`)
 .then(()=>console.log("mongodb is connected"))
 .catch(err=>console.error(err));
 
