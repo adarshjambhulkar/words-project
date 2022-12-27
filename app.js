@@ -27,8 +27,8 @@ app.get("/",(req,res)=>{
     res.send({msg:"welcome to words API"})
 });
 
-app.get("/alphabet/:data",(req,res)=>{
-    const inputWord = req.params.data.slice(0,1);
+app.get("/latter/:data",(req,res)=>{
+    const inputWord = req.params.data.slice(0,1).toLowerCase();
     List.find({ main: inputWord }, (err, result) => {
         if (err) { console.log(err); }
         else {
@@ -43,7 +43,7 @@ app.get("/alphabet/:data",(req,res)=>{
 });
 
 app.get("/words/:data", (req, res) => {
-    const inputWord = req.params.data
+    const inputWord = req.params.data.toLowerCase();
     if (inputWord.length == 2) {
         List.find({ word: inputWord }, (err, result) => {
             if (err) { console.log(err); }
@@ -52,12 +52,12 @@ app.get("/words/:data", (req, res) => {
             }
         });
     } else {
-        res.send(["only two alphabates requred"])
+        res.status(404).send(["only two alphabates requred"])
     }
 });
 
 app.get("/matches/:word", (req, res) => {
-    const inputWord = req.params.word;
+    const inputWord = req.params.word.toLowerCase();
     if (inputWord.length >= 2) {
         List.find({ word: inputWord.slice(0, 2) }, (err, result) => {
             if (err) { console.log(err); }
@@ -68,12 +68,31 @@ app.get("/matches/:word", (req, res) => {
             }
         });
     } else {
-        res.send(["minimum two alphabates requred"])
+        res.status(404).send(["minimum two alphabates requred"])
     }
 })
 
+app.get("/details/:word", (req, res) => {
+    const inputWord = req.params.word.toLowerCase();
+    if (inputWord.length >= 2) {
+        List.find({ word: inputWord.slice(0, 2) }, async (err, result) => {
+            if (err) { console.log(err) }
+            else {
+                let data = result.length === 0 ? [] : result[0].data;
+                let arrlist = data.filter((item) => item === inputWord);
+                let mydata = await detailsList(arrlist,1);
+                let sampledata=mydata.length!=0?mydata[inputWord]:[];
+                res.send(sampledata);
+            }
+        });
+    } else {
+        res.status(404).send(["minimum two alphabates requred"])
+    }
+
+});
+
 app.get("/details/matches/:word-:calls", (req, res) => {
-    const inputWord = req.params.word;
+    const inputWord = req.params.word.toLowerCase();
     const maxLength = Number(req.params.calls)
     
     if (inputWord.length >= 2) {
@@ -86,33 +105,54 @@ app.get("/details/matches/:word-:calls", (req, res) => {
             }
         });
     } else {
-        res.send(["minimum two alphabates requred"])
+        res.status(404).send(["minimum two alphabates requred"])
     }
 })
-app.get("/details/:word", (req, res) => {
-    const inputWord = req.params.word;
-    if (inputWord.length >= 2) {
-        List.find({ word: inputWord.slice(0, 2) }, async (err, result) => {
-            if (err) { console.log(err); }
-            else {
-                let data = result.length === 0 ? [] : result[0].data
-                let arrlist = data.filter((item) => item === inputWord);
 
-                let mydata = await detailsList(arrlist,1)
-                
-                res.send(mydata[inputWord]?mydata[inputWord]:["No word found"]);
-            }
-        });
-    } else {
-        res.send(["minimum two alphabates requred"])
+function manageData(arr){
+    if(arr.length===0){
+        return [];
     }
+    let result = {"word":"","meanings":[],"audiofiles":[],"phonetic":""}
+    arr.forEach((element) => {
+        const {word,phonetics,meanings} = element;
+        result.word= result.word===word? result.word :word;
+        result.phonetic= element.phonetic?element.phonetic:"";
+        let tempAudio = phonetics.filter(audioItem=>audioItem.audio);
+        if(tempAudio.length!=0){
+            tempAudio.forEach(element => {
+                if(result.audiofiles.length===0){
+                    result.audiofiles.push(element.audio);
+                }else{
+                    let temp = result.audiofiles.find(item=>item===element.audio);
+                    if(!temp){
+                        result.audiofiles.push(element.audio);
+                    }
+                }
+            });
+        }
+        meanings.forEach(item=>{
+            let meaningData = {};
+            meaningData.partOfSpeech = item.partOfSpeech?item.partOfSpeech:"";
+            meaningData.definations = item.definitions.map(def=>def.definition);
+            let exampleData = item.definitions.filter(item=>item.example);
+            meaningData.examples = exampleData.map(item=>item.example);
+            meaningData.synonyms=item.synonyms;
+            meaningData.antonyms=item.antonyms;
+            result.meanings = [...result.meanings, meaningData];
+        })
+        result.sourceUrls=[...element.sourceUrls,"https://dictionaryapi.dev/"];
+    });
+    return result;
 
-});
-
+}
 
 
 async function detailsList(arrlist,maxLength){
     let arr = arrlist;
+    if(arr.length===0){
+        return []
+    }
     if(!maxLength){
         return { "ErrorMsg":"invalid input, use <word>-<Number>"}
     }
@@ -126,7 +166,7 @@ async function detailsList(arrlist,maxLength){
             let url = "https://api.dictionaryapi.dev/api/v2/entries/en/"+item;    
             axios.get(url)
             .then(function (result) {        
-            vals[item]=result.data;
+            vals[item]=manageData(result.data);
             })
             .catch(function (error) {
             vals[item]=[];
